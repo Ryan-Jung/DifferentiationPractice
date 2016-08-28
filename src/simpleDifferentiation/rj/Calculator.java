@@ -16,7 +16,7 @@ public class Calculator {
 	 * Evaluates a postfix expression and returns the answer. Each term must be separated
 	 * with commas. 
 	 * 		Example : 5x,(5,5x,+)^5,- 
-	 * @param exp Must be a valid postfix expression
+	 * @param expr - a valid postfix expression
 	 * @return a String representing the answer
 	 */
 	public Stack<String> evaluate(String expr) throws InvalidExpression{
@@ -25,28 +25,47 @@ public class Calculator {
 		
 		int i = 0;
 		while(i < expr.length()){
-			
-			//push parenthetical expression as a single term since chain rule
-			//needs to be applied
-			if(expr.charAt(i) == '('){
-				String parenTerm = readParenTerm(expr, i);
-				termStack.push(parenTerm);
-				
+			int opToDo = checkOperation(expr.charAt(i));
+			// -1 equals no operation
+			if(opToDo < 0){
+				String term = readTerm(expr, i);
+				termStack.push(term);
+				i += term.length();
 			}else{
-				int locToReadTo = findLocOfNextOp(expr);
 				
 			}
-			}
+			
+		}
 			
 		return termStack;
 	}
 	/**
+	 * Reads to the end of term which is indicated by a comma
+	 * @param expr - a valid postfix expression with commas separating each term
+	 * @return the term
+	 */
+	private String readTerm(String expr, int i){
+		String term = "";
+		while(i < expr.length() && isNotOperator(expr.charAt(i))){
+			if(expr.charAt(i) == ','){
+				return term;
+			}
+			if(expr.charAt(i) == '('){
+				return readParenTerm(expr, i);
+			}else{
+				term += expr.charAt(i);
+			}
+			i++;
+		}
+		return " ";
+	}
+	/**
 	 * 
-	 * @param expr expression to be looked at
-	 * @param i index where char '(' was read
+	 * @param expr - valid expresion
+	 * @param i - index where char '(' was read
 	 * @return 
 	 */
-	public String readParenTerm(String expr, int i){
+	private String readParenTerm(String expr, int i){
 		String parenTerm= "";
 		while(i < expr.length() && expr.charAt(i) != ')'){
 			parenTerm += expr.charAt(i);
@@ -58,37 +77,12 @@ public class Calculator {
 		}
 		return  parenTerm;
 	}
-	private int findLengthOfTerm(String expr){
-		int i = 0;
-		while(i < expr.length() && expr.charAt(i) != ','){
-			i++;
-		}
-		return i;
+
+	private boolean isNotOperator(char charToCheck) {
+		return !(charToCheck == '+' || charToCheck == '-' || charToCheck == '*' || charToCheck == '/');
+
 	}
 	
-	/**
-	 * @param expr expression to examine
-	 * @return location of first operation to appear in an expression
-	 * @throws InvalidExpression 
-	 */
-	private int findLocOfNextOp(String expr) throws InvalidExpression{
-		int location = Integer.MAX_VALUE ;
-		char [] opsToFind = {'+', '-', '/', '*'};
-		for(int i = 0 ; i < opsToFind.length; i++){
-			if(expr.indexOf(opsToFind[i]) < location){
-				location = expr.indexOf(opsToFind[i]);
-			}
-		}
-		if(location == Integer.MAX_VALUE){
-			throw new InvalidExpression("Missing operation");
-		} 
-		return location;
-		
-	}
-	
-
-	
-
 	/**
 	 * Returns 1 for addition, 2 for subtraction, 3 for multiplication, 4 for
 	 * division, and -1 if not an operation
