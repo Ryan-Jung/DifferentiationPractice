@@ -38,17 +38,17 @@ public class Expression {
 	}
 
 	/**
-	 * Generates random integers from 1 to 10 for the constant and power of x of
+	 * Generates random integers from 1 to 10 for the coefficient and power of x of
 	 * a term
 	 * 
 	 * @return a term
 	 */
 	private String termGenerator() {
 
-		int randomConstant = (int) (Math.random() * 10 + 1);
+		int randomcoefficient = (int) (Math.random() * 10 + 1);
 		int randomPower = (int) (Math.random() * 10 + 1);
 
-		Term<Integer> newTerm = new Term<Integer>(randomConstant, randomPower);
+		Term<Integer> newTerm = new Term<Integer>(randomcoefficient, randomPower);
 		return newTerm.toString();
 	}
 
