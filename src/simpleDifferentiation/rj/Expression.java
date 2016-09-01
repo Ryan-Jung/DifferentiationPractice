@@ -30,7 +30,7 @@ public class Expression {
 		setExpression(expr);
 	}
 	/**
-	 * 
+	 * Converts the infix expression to postfix and sets it.
 	 * @param expression a valid infix expression
 	 */
 	Expression(String expression) {
@@ -73,7 +73,7 @@ public class Expression {
 	/**
 	 * Converts an infix expression to postfix before setting it
 	 * 
-	 * @param exp a valid infix expression
+	 * @param expr a valid infix expression
 	 */
 	public void setExpression(String expr) {
 		expr = infixToPostfix(expr);
@@ -90,9 +90,10 @@ public class Expression {
 	}
 
 	/**
-	 * Uses the shunting-yard alrgorithm to convert an infix expression to
-	 * postfix (Note: Parenthetical expressions are considered as a single term).
-	 * 
+	 * Uses the shunting-yard alrgorithm (https://en.wikipedia.org/wiki/Shunting-yard_algorithm) 
+	 * to convert an infix expression to postfix. Parenthetical expressions are 
+	 * considered as a single term ie. "(5x + 2 - 4x^6)^2" is considered as a 
+	 * single term.
 	 * @param expr A valid infix expression
 	 * @return A string representing an expression's postfix notation with each
 	 *         term separated by commas
