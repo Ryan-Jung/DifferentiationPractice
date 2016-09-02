@@ -104,8 +104,7 @@ public class Expression {
 
 		for (int i = 0; i < expr.length(); i++) {
 			String term = "";
-			// since operations may be inside parenthesis read everything in 
-			// parenthesis as a whole term
+			//since operations may be inside parenthesis
 			if (expr.charAt(i) == '(') {
 				while (expr.charAt(i) != ')') {
 					term += expr.charAt(i);
@@ -123,7 +122,8 @@ public class Expression {
 				postfix += term + ",";
 			} else {
 				// read term
-				while (i < expr.length() && isNotOperator(expr.charAt(i))) {
+				while (i < expr.length() && 
+						(isNotOperator(expr.charAt(i))|| isNegExponent(expr, i)) ) {
 					term += expr.charAt(i);
 					i++;
 				}
@@ -132,15 +132,14 @@ public class Expression {
 				postfix += term;
 
 			}
-			// Operator encountered. Decides which operation needs to be
-			// added to postfix string
+			// Decides which operation needs to be added to postfix string
 			if (i < expr.length() && !isNotOperator(expr.charAt(i))) {
 				if (operatorStack.isEmpty()) {
 					operatorStack.push(expr.charAt(i));
 				} else {
 					char operatorToCheck = expr.charAt(i);
 					char operatorOnStack = operatorStack.peek();
-
+					//keep popping operations with higher precedence
 					while (operationPrecedence(operatorToCheck) >= operationPrecedence(operatorOnStack)
 							&& !operatorStack.isEmpty()) {
 						postfix += operatorStack.pop();
@@ -151,6 +150,7 @@ public class Expression {
 			}
 
 		}
+		//pop remaining operations
 		while (!operatorStack.isEmpty()) {
 			postfix += operatorStack.pop();
 		}
@@ -189,6 +189,20 @@ public class Expression {
 	private boolean isNotOperator(char charToCheck) {
 		return !(charToCheck == '+' || charToCheck == '-' || charToCheck == '*' || charToCheck == '/');
 
+	}
+	/**
+	 * If a subtraction sign is encountered determines if the exponent is a 
+	 * negative number
+	 * @param expr the expression to read
+	 * @param i an index for the String
+	 * @return True if the index where are '-' is read is a negative exponent and false
+	 * otherwise.
+	 */
+	private boolean isNegExponent(String expr, int i){
+		if(expr.charAt(i) == '-')
+			return expr.charAt(i-1) == '^';
+		else 
+			return false;
 	}
 
 
