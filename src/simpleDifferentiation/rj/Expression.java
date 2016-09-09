@@ -4,16 +4,16 @@ import java.util.Stack;
 
 /**
  * Holds an expression in postfix notation with each term separated by a comma.
- * (Example : 5x,(5,5x,+)^5,- )Parenthetical expressions are considered as a single term.
+ * (Example : 5x,(5x+5x^1)^5,- ). Parenthetical expressions are considered as a single term.
  * Can randomly generate an expression by calling the default constructor or can 
- * take in an infix expression and convert it to  postfix. To see or use the expression
- * call getExpression.
+ * take in an infix expression. Also holds the original infix expression.
  * @author Ryan Jung
  *
  */
 public class Expression {
 
-	private String expression;
+	private String postfixExpression;
+	private String originalExpression;
 
 	/**
 	 * Creates an expression with random integers and operators containing at
@@ -27,29 +27,34 @@ public class Expression {
 			expr += signGenerator();
 		}
 		expr += termGenerator();
+		
+		originalExpression = expr;
 		setExpression(expr);
 	}
 	/**
-	 * Converts the infix expression to postfix and sets it.
+	 * Sets the infix expression and sets the postfix expression.
 	 * @param expression a valid infix expression
 	 */
 	Expression(String expression) {
+		originalExpression = expression;
 		setExpression(expression);
 	}
 
 	/**
 	 * Generates random integers from 1 to 10 for the coefficient and power of x of
 	 * a term
-	 * 
-	 * @return a term
+	 * @return - the term
 	 */
 	private String termGenerator() {
 
-		int randomcoefficient = (int) (Math.random() * 10 + 1);
-		int randomPower = (int) (Math.random() * 10 + 1);
+		Integer randomCoefficient = (int) (Math.random() * 10 + 1);
+		Integer randomPower = (int) (Math.random() * 10 + 1);
+		
 
-		Term<Integer> newTerm = new Term<Integer>(randomcoefficient, randomPower);
-		return newTerm.toString();
+		if(randomPower == 0){
+			return randomCoefficient.toString();
+		}
+		return randomCoefficient.toString() + "x^" +  randomPower.toString();
 	}
 
 	/**
@@ -71,29 +76,30 @@ public class Expression {
 	}
 
 	/**
-	 * Converts an infix expression to postfix before setting it
+	 * Converts an infix expression to postfix before setting it.
 	 * 
 	 * @param expr a valid infix expression
 	 */
 	public void setExpression(String expr) {
 		expr = infixToPostfix(expr);
 		// remove all whitespace
-		expression = expr.replaceAll("\\s+", "");
+		postfixExpression = expr.replaceAll("\\s+", "");
 	}
 
 	/**
 	 * Returns a postfix expression with commas separating terms
 	 * @return an expression in postfix notation 
 	 */
-	public String getExpression() {
-		return expression;
+	public String getPostfixExpression() {
+		return postfixExpression;
 	}
 
 	/**
 	 * Uses the shunting-yard alrgorithm (https://en.wikipedia.org/wiki/Shunting-yard_algorithm) 
 	 * to convert an infix expression to postfix. Parenthetical expressions are 
 	 * considered as a single term ie. "(5x + 2 - 4x^6)^2" is considered as a 
-	 * single term.
+	 * single term. A number is only considered as a negative sign when it is an exponent,
+	 * otherwise it is the subtraction operation.
 	 * @param expr A valid infix expression
 	 * @return A string representing an expression's postfix notation with each
 	 *         term separated by commas
@@ -110,10 +116,6 @@ public class Expression {
 					term += expr.charAt(i);
 					i++;
 				}
-				// make sure expression in parenthesis is in postfix notation
-				term = term.replaceAll("[(]", "");
-				term = "(" + infixToPostfix(term);
-
 				while (i < expr.length() && isNotOperator(expr.charAt(i))) {
 					term += expr.charAt(i);
 					i++;
@@ -121,11 +123,15 @@ public class Expression {
 
 				postfix += term + ",";
 			} else {
-				// read term
+				//read term
 				while (i < expr.length() && 
 						(isNotOperator(expr.charAt(i))|| isNegExponent(expr, i)) ) {
 					term += expr.charAt(i);
 					i++;
+				}
+				//since it's common to write x for 1x
+				if(term.equals("x")){
+					term = "1x";
 				}
 				term += ",";
 
@@ -203,6 +209,14 @@ public class Expression {
 			return expr.charAt(i-1) == '^';
 		else 
 			return false;
+	}
+	/**
+	 * Returns the original expression that was provided by the user or randomly generated
+	 * from the default constructor.
+	 * @return The original infix expression.
+	 */
+	public String getOriginalExpression(){
+		return originalExpression;
 	}
 
 
