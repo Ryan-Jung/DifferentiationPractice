@@ -82,8 +82,9 @@ public class Expression {
 	 */
 	public void setExpression(String expr) {
 		expr = infixToPostfix(expr);
-		// remove all whitespace
-		postfixExpression = expr.replaceAll("\\s+", "");
+		//make everything lower case and remove white space
+		expr = expr.toLowerCase().replaceAll("\\s+", "");
+		postfixExpression = expr;
 	}
 
 	/**
@@ -105,18 +106,22 @@ public class Expression {
 	 *         term separated by commas
 	 */
 	private String infixToPostfix(String expr) {
+		//remove all white space
+		expr = expr.replaceAll("\\s+", "");
 		Stack<Character> operatorStack = new Stack<Character>();
 		String postfix = "";
 
 		for (int i = 0; i < expr.length(); i++) {
 			String term = "";
-			//since operations may be inside parenthesis
+			//since operations may be inside parenthesis read whole parenthetical
+			//expression as term
 			if (expr.charAt(i) == '(') {
 				while (expr.charAt(i) != ')') {
 					term += expr.charAt(i);
 					i++;
 				}
-				while (i < expr.length() && isNotOperator(expr.charAt(i))) {
+				while (i < expr.length() && 
+						(isNotOperator(expr.charAt(i)) || isNegExponent(expr, i))) {
 					term += expr.charAt(i);
 					i++;
 				}
