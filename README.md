@@ -31,6 +31,7 @@ String answerToExpression2 = calculator2.differentiate();
 String simplifiedAnswer1 = Simplifier.simplify(answerToExpression1);
 String simplifiedAnswer2 = Simplifier.simplify(answerToExpression2);
 ```
+---
 
 
 # It can differentiate expressions that involve:
