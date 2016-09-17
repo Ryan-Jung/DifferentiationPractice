@@ -19,6 +19,11 @@ String answer = Calculator.differentiate(expression.getPostFixExpression);
 ```
 ###### Note: The answer will not be completely simplified.
 
+#### Sample Output
+```{Java}
+
+```
+
 # It can differentiate expressions that involve:
 #### -The chain rule
 #### -The product rule

@@ -19,12 +19,13 @@ public final class Reader {
 	 */
 	public static String readTerm(String expr, int i){
 		String term = "";
-		while(i < expr.length() && (isNotOperator(expr.charAt(i)) || isNegExponent(expr, i))){
+		while(i < expr.length() && (isNotOperator(expr.charAt(i)) || isNegExponent(expr, i)
+				|| i == 0)){
 			if(expr.charAt(i) == ','){
 				return term;
 			}
 			if(expr.charAt(i) == '('){
-				return readParenTerm(expr, i);
+				return term += readParenTerm(expr, i);
 			}else{
 				term += expr.charAt(i);
 			}
@@ -41,7 +42,7 @@ public final class Reader {
 	 * otherwise.
 	 */
 	private static boolean isNegExponent(String expr, int i){
-		if(expr.charAt(i) == '-')
+		if(expr.charAt(i) == '-' && i != 0)
 			return expr.charAt(i-1) == '^';
 		else 
 			return false;

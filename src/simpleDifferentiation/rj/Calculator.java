@@ -12,13 +12,22 @@ import java.util.Stack;
  * @author Ryan Jung
  *
  */
-public final class Calculator {
-	
-	//no instances
-	private Calculator(){
-		
+public class Calculator {
+	private Expression expression;
+
+	public Calculator(Expression expression){
+		this.expression = expression;
 	}
 	
+	/**
+	 * Differentiates the expression that was given when this instance was created.
+	 * @throws InvalidExpression If a term can't be read or there are more operations
+	 * then operands.
+	 * 
+	 */
+	public String differentiate() throws InvalidExpression{
+		return differentiate(expression.getPostfixExpression());
+	}
 	/**
 	 * Evaluates a postfix expression and returns the answer. Each term must be separated
 	 * with commas(Parenthetical Expressions are considered as a single term). Uses a stack
@@ -30,8 +39,7 @@ public final class Calculator {
 	 * @throws InvalidExpression - If a term can't be read or there are more operations
 	 * then operands.
 	 */
-	public static String differentiate(String expr) throws InvalidExpression{
-		expr = expr.toLowerCase().replaceAll("\\s+", "");
+	public String differentiate(String expr) throws InvalidExpression{
 		
 		Stack<String> termStack = new Stack<String>();
 		
@@ -44,6 +52,10 @@ public final class Calculator {
 		
 		while(i < expr.length()){
 			int opToDo = checkOperation(expr.charAt(i));
+			//Prevent negative sign being read as subtraction in the beginning of expression
+			if( i == 0 ){
+				opToDo = -1;
+			}
 			//push terms to stack until operation is encountered.
 			if(opToDo < 0){
 				String term = Reader.readTerm(expr, i);
@@ -71,7 +83,7 @@ public final class Calculator {
 	 * @param charToRead
 	 * @return An integer representing the operation.
 	 */
-	private static int checkOperation(char charToRead){
+	private int checkOperation(char charToRead){
 		if (charToRead == '+')
 			return 1;
 		else if (charToRead == '-')
@@ -88,41 +100,45 @@ public final class Calculator {
 	 * Pops two terms off the term stack and conducts the appropriate operation
 	 * for those two terms. Once the resulting derivative has been evaluated
 	 * adds an '&' to the end of the result indicating that the term has already been
-	 * differentiated and then pushes back the result to the term stack. Note term1
-	 * is actually the term after an operator and term2 is the term before the operator.
-	 * For example in the expression "5/2" term2 = 5 and term1 = 2. 
+	 * differentiated and then pushes back the result to the term stack. 
 	 * @param termStack - A stack containing the expression's terms
 	 * @param opToDo - An operation (1 = '+' , 2 = '-' , 3 = '*', 4 = '/').
 	 * @throws InvalidExpression - When a term is invalid. eg. Uses variables other than 'x'
 	 * or contains non-numbers in the exponent or coefficient.
 	 */
-	private static void doOperation(Stack<String> termStack, int opToDo) throws InvalidExpression{
+	private void doOperation(Stack<String> termStack, int opToDo) throws InvalidExpression{
 		String result = "";
 		String term1 = termStack.pop(); 
 		String term2 = termStack.pop();
 		switch(opToDo){
-		
+			//addition
 			case 1:		
 				// '&' implies derivative has already been calculated for a term
 				if(term2.contains("&")){
 					result = sumRule(term1, "")+ "+" + term2;
-				}else
+				}else if(term1.contains("&")){
+					result = term1 + "+" + sumRule("", term2);
+				}else{
 					result = sumRule(term1, term2);
-				
+				}
 				break;	
-	
+			//subtraction	
 			case 2:
-				if(term2.contains("&")){
+				if(term2.contains("&") && !term1.contains("&")){
 					result = term2 + differenceRule("" , term1);
+				}else if(term1.contains("&") && term2.contains("&")){
+					result = term2 + "-" + term1;
+				}else if(term1.contains("&") && !term2.contains("&")){
+					result = differenceRule(term2, "") + "-" + term1;
 				}else{
 					result = differenceRule(term2, term1);
 				}	
 				break;
-				
+			//multiplication	
 			case 3:
-				result = productRule(term1, term2);
+				result = productRule(term2, term1);
 				break;
-				
+			//division	
 			case 4:
 				result = quotientRule(term2,term1);
 				break;		
@@ -141,63 +157,27 @@ public final class Calculator {
 	 * @throws InvalidExpression - When a term is invalid. eg. Uses variables other than 'x'
 	 * or contains non-numbers in the exponent or coefficient.
 	 */
-	public static String productRule(String term1, String term2) throws InvalidExpression{
-		
+	public String productRule(String term1, String term2) throws InvalidExpression{
 		String derivTerm1 = getDerivative(term1);
 		String derivTerm2 = getDerivative(term2);
-		
+
 		String term1TimesDerivTerm2 = "";
 		String derivTerm1TimesTerm2 = "";
-		//Since terms involving chain rule are more difficult to multiply leave it unsimplified
-		if(derivTerm2.contains("(") || term1.contains("(")){
-			term1TimesDerivTerm2 = term1 + "*" + derivTerm2;
-		}
-		if(derivTerm1.contains("(") || term2.contains("(")){
-			derivTerm1TimesTerm2 = derivTerm1 + "*" + term2;
-		}
-		
-		//No chain rule -> multiply
-		if(derivTerm1TimesTerm2.equals("")){
-			derivTerm1TimesTerm2 = multiply(derivTerm1, term2);
-		}
-		if(term1TimesDerivTerm2.equals("")){
-			term1TimesDerivTerm2 = multiply(derivTerm2, term1);
-		}
+
+		term1TimesDerivTerm2 = multiply(term1,derivTerm2);
+		derivTerm1TimesTerm2 = multiply(derivTerm1, term2);
 		
 		return derivTerm1TimesTerm2 + "+" + term1TimesDerivTerm2;
 	}
 	/**
-	 * Multiplies two terms together. Does not do multiplication involving
-	 * parenthetical expressions. Only works with the variable 'x'.
-	 * @param term1 - A simplified term eg. "25x^2" instead of "5^2x^2".
-	 * @param term2 - A simplified term eg. "25x^2" instead of "5^2x^2".
+	 * Simply adds a the multiplication operator '*' between the two terms
+	 * and returns the String "term1*term2". Does not do any sort of simplification.
+	 * @param term1 
+	 * @param term2  
 	 * @return the result 
 	 */
-	private static String multiply(String term1, String term2){	
-		
-		double coefTerm1 = Reader.stringToDouble(Reader.readCoefficient(term1));
-		double coefTerm2 = Reader.stringToDouble(Reader.readCoefficient(term2));
-		double coefT1timescoefT2 = coefTerm1 * coefTerm2;
-		
-		double powTerm1 = Reader.stringToDouble(Reader.readPower(term1));
-		double powTerm2 = Reader.stringToDouble(Reader.readPower(term2));
-		double term1powPlusTerm2pow = powTerm1 + powTerm2; 
-		
-		//round to at most 2 places, get rid of unnecessary zeros.
-		DecimalFormat df = new DecimalFormat("#.##");
-		String formattedCoefficient = df.format(coefT1timescoefT2);
-		String formattedPower = df.format(term1powPlusTerm2pow);
-		
-		//if both terms are constants
-		if(term1powPlusTerm2pow == 0){
-			return formattedCoefficient;
-		}else if(term1powPlusTerm2pow != 1){
-			return formattedCoefficient + "x^" + formattedPower;
-		}else{
-			return formattedCoefficient + "x";
-		}
-		
-		
+	private String multiply(String term1, String term2){	
+		return term1 + "*" + term2;
 	}
 	/**
 	 * Applies the quotient rule (https://en.wikipedia.org/wiki/Quotient_rule) for 
@@ -211,36 +191,19 @@ public final class Calculator {
 	 * @throws InvalidExpression - When a term is invalid. eg. Uses variables other than 'x'
 	 * or contains non-numbers in the exponent or coefficient.
 	 */
-	public static String quotientRule(String term1, String term2) throws InvalidExpression{
+	public String quotientRule(String term1, String term2) throws InvalidExpression{
 		
 		String derivTerm1 = getDerivative(term1);	
 		String derivTerm2 = getDerivative(term2);
-		
-		String derivTerm1TimesTerm2 = "";
-		String derivTerm2TimesTerm1 = "";
-		//Since terms involving chain rule are more difficult to multiply leave it unsimplified
-		if(derivTerm2.contains("(") || term1.contains("(")){
-			derivTerm2TimesTerm1 =  derivTerm2 + "*" + term1 ;
-		}
-		if(derivTerm1.contains("(") || term2.contains("(")){
-			derivTerm1TimesTerm2 = derivTerm1 + "*" + term2;
-		}
 
-		//No chain rule -> multiply
-		if(derivTerm1TimesTerm2.equals("")){
-			derivTerm1TimesTerm2 = multiply(derivTerm1, term2);
-		}
-		if(derivTerm2TimesTerm1.equals("")){
-				derivTerm2TimesTerm1 = multiply(derivTerm2, term1);
-		}
+		String derivTerm1TimesTerm2 = multiply(derivTerm1, term2);
+		String derivTerm2TimesTerm1 = multiply(derivTerm2,term1);
 		
 		String numerator = "(" + derivTerm1TimesTerm2 + "-" + derivTerm2TimesTerm1 + ")";
 		String denominator = "";
-		if(term2.contains("(")){
-			denominator = "(" + term2 + ")" + "^2";
-		}else{
-			denominator = "(" + multiply(term2, term2) + ")";
-		}
+		
+		denominator = "(" + term2 + ")" + "^2";
+
 		return numerator + "/" + denominator; 
 	}
 	/**
@@ -253,7 +216,7 @@ public final class Calculator {
 	 * @throws InvalidExpression - When a term is invalid. eg. Uses variables other than 'x'
 	 * or contains non-numbers in the exponent or coefficient.
 	 */
-	public static String sumRule(String term1, String term2) throws InvalidExpression{
+	public String sumRule(String term1, String term2) throws InvalidExpression{
 		if(term1.equals(""))
 			return getDerivative(term2);
 		else if(term2.equals(""))
@@ -273,7 +236,7 @@ public final class Calculator {
 	 * @throws InvalidExpression - When a term is invalid. eg. Uses variables other than 'x'
 	 * or contains non-numbers in the exponent or coefficient.
 	 */
-	public static String differenceRule(String term1, String term2) throws InvalidExpression{
+	public String differenceRule(String term1, String term2) throws InvalidExpression{
 		
 		if(term1.equals(""))
 			return "-" + getDerivative(term2);
@@ -294,9 +257,9 @@ public final class Calculator {
 	 * @return the derivative
 	 * @throws InvalidExpression- when a term contains non-numbers where they aren't expected.
 	 */
-	public static String getDerivative(String term) throws InvalidExpression{
+	public String getDerivative(String term) throws InvalidExpression{
 		//if there a unexpected characters
-		if(term.matches(".*[^x^0-9()\\[\\]].*")){
+		if(term.matches(".*[^x^0-9()\\[\\]\\+\\-\\*\\/].*") && !term.contains("&")){
 			throw new InvalidExpression(term + " is not a valid term");
 		}
 		//derivative of a constant is 0
@@ -315,7 +278,7 @@ public final class Calculator {
 			coef = Reader.stringToDouble(coefficient);
 			pow = Reader.stringToDouble(power);
 		}catch(NumberFormatException nfex){
-			throw new InvalidExpression(term + " could not be differentiated.");
+			throw new InvalidExpression(expression.getOriginalExpression() + " could not be differentiated.");
 		}
 		
 		//For rounding to at most 2 decimal places
@@ -330,8 +293,7 @@ public final class Calculator {
 			String formattedPow = df.format(pow);
 			
 			return formattedCoef + "x" + "^" + formattedPow;	
-		}else{
-			
+		}else{	
 			String formattedCoef = df.format(coef);
 			return String.valueOf(formattedCoef);
 		}
@@ -344,9 +306,14 @@ public final class Calculator {
 	 * @return
 	 * @throws InvalidExpression - When the expression in parenthesis can't be differentiated.
 	 */
-	private static String applyChainRule(String term) throws InvalidExpression{
+	private String applyChainRule(String term) throws InvalidExpression{
 		
 		int endOfParen = term.indexOf(')') + 1;
+		//For separating negative sign from parenthetical expression
+		boolean negativeTerm = false;
+		if(term.charAt(0) == '-'){
+			negativeTerm = true;
+		}
 		
 		//if there are unexpected characters after a parenthesis
 		if(endOfParen - 1 == term.length() && term.charAt(endOfParen+1) != '^'){
@@ -359,11 +326,20 @@ public final class Calculator {
 			return "(" + differentiate(ex.getPostfixExpression()) + ")";
 		}
 		//if exponent is 0 derivative is 0
+		try{
 		if(Reader.stringToDouble(Reader.readPower( term.substring(endOfParen,term.length()))) == 0){
 			return "0";
 		}
+		}catch(NumberFormatException nfe){
+			throw new InvalidExpression(term + " is not a valid term");
+		}
 		
-		String insideParen = term.substring(0, endOfParen);
+		String insideParen = "";
+		if(negativeTerm){
+			insideParen = term.substring(1,endOfParen);
+		}else{
+			insideParen = term.substring(0, endOfParen);
+		}
 		String insideParenNoParen = insideParen.replaceAll("[()]", "");
 		Expression parenExpression = new Expression(insideParenNoParen);
 		
@@ -380,7 +356,11 @@ public final class Calculator {
 		
 		derivativeOfParenExp = "(" + derivativeOfParenExp + ")";
 		
-		String result = "(" + parenPower + derivativeOfParenExp +")" + insideParen + "^" + parenPowerMinusOne;
+		String result = "(" + parenPower + derivativeOfParenExp +")*" + insideParen + "^" + parenPowerMinusOne;
+		//put back negative sign
+		if(negativeTerm){
+			result = "-" + result;
+		}
 		return result;
 	}
 
