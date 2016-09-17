@@ -1,6 +1,8 @@
 # Differentiation Practice
 Differentiation Practice is a project designed to help practice and solve problems requiring simple differentiation. It can be used to find d/dx(f(x)) for simple functions. It simply takes in the expression converts the expression into a more easily evaluable form (postfix notation) and then differentiates that expression following simple rules for differentiation.
+
 ---
+
 
 # Sample Program:
 ### Enter the expression you would like to evaluate or have one randomly generated for you like so:
