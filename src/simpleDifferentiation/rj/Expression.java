@@ -113,6 +113,10 @@ public class Expression {
 
 		for (int i = 0; i < expr.length(); i++) {
 			String term = "";
+			if(i == 0 && expr.charAt(0) == '-'){
+				term += expr.charAt(0);
+				i++;
+			}
 			//since operations may be inside parenthesis read whole parenthetical
 			//expression as term
 			if (expr.charAt(i) == '(') {
@@ -130,14 +134,19 @@ public class Expression {
 			} else {
 				//read term
 				while (i < expr.length() && 
-						(isNotOperator(expr.charAt(i))|| isNegExponent(expr, i)) ) {
+						(isNotOperator(expr.charAt(i))|| isNegExponent(expr, i))
+						|| (i == 0 && expr.charAt(0) == '-')) {
 					term += expr.charAt(i);
 					i++;
 				}
-				//since it's common to write x for 1x
-				if(term.equals("x")){
-					term = "1x";
+				//since it's common to write x for 1x and -x for -1x
+				if(!term.equals("") && term.charAt(0) == 'x'){
+					term = "1" + term;
 				}
+				if(!term.equals("") && term.charAt(0) == '-'&& term.charAt(1) == 'x'){
+					term = "-1x";
+				}
+				
 				term += ",";
 
 				postfix += term;
@@ -210,7 +219,7 @@ public class Expression {
 	 * otherwise.
 	 */
 	private boolean isNegExponent(String expr, int i){
-		if(expr.charAt(i) == '-')
+		if(expr.charAt(i) == '-' && i != 0)
 			return expr.charAt(i-1) == '^';
 		else 
 			return false;
