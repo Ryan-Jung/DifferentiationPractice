@@ -1,12 +1,13 @@
 # Differentiation Practice
-Differentiation Practice is a project designed to help practice and solve problems requiring simple differentiation. It can be used to find d/dx(f(x))
-for simple functions. It simply takes in the expression converts the expression into a more easily evaluable form (postfix notation) and then differentiates that expression following simple rules for differentiation.
+Differentiation Practice is a project designed to help practice and solve problems requiring simple differentiation. It can be used to find d/dx(f(x)) for simple functions. It simply takes in the expression converts the expression into a more easily evaluable form (postfix notation) and then differentiates that expression following simple rules for differentiation. 
+
 ---
+# Requires the use of Symja (https://bitbucket.org/axelclk/symja_android_library/wiki/) for simplifying expressions. Download https://bitbucket.org/axelclk/symja_android_library/downloads/symja_java8-2016-07-24.zip and add to the build bath
 
 # Sample Program:
 ### Enter the expression you would like to evaluate or have one randomly generated for you like so:
 ```{Java}
-import simpleDifferentiation.rj;
+import simpleDifferentiation.rj.*;
 
 //Generate random expression
 Expression expression1 = new Expression();
@@ -19,9 +20,12 @@ Expression expression2 = new Expression("5x^7 + 2131x * (5x + 381)");
 ```{Java}
 Calculator calculator1 = new Calculator(expression1);
 Calculator calculator2 = new Calculator(expression2);
+String answerToExpression1 = "";
+String answerToExpression2 = "";
+//Throws an InvalidExpression exception if there are problems differentiating.
 try{
-String answerToExpression1 = calculator1.differentiate();
-String answerToExpression2 = calculator2.differentiate();
+    answerToExpression1 = calculator1.differentiate();
+    answerToExpression2 = calculator2.differentiate();
 }catch(InvalidExpression iex){
     System.out.println(iex.getMessage());
 }
@@ -32,6 +36,7 @@ String answerToExpression2 = calculator2.differentiate();
 String simplifiedAnswer1 = Simplifier.simplify(answerToExpression1);
 String simplifiedAnswer2 = Simplifier.simplify(answerToExpression2);
 ```
+---
 
 
 # It can differentiate expressions that involve:
