@@ -8,7 +8,7 @@ import org.matheclipse.core.interfaces.IExpr;
  * @author Ryan Jung
  *
  */
-public class Simplifier {
+public final class Simplifier {
 	//no instances
 	private Simplifier(){};
 	/**
