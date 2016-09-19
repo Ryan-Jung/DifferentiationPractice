@@ -19,7 +19,7 @@ public class Expression {
 	 * Creates an expression with random integers and operators containing at
 	 * most 4 terms and at least 3 terms
 	 */
-	Expression() {
+	public Expression() {
 		int numberOfTerms = (int) (Math.random() * 2 + 2);
 		String expr = "";
 		for (int i = 0; i < numberOfTerms; i++) {
@@ -35,7 +35,7 @@ public class Expression {
 	 * Sets the infix expression and sets the postfix expression.
 	 * @param expression a valid infix expression
 	 */
-	Expression(String expression) {
+	public Expression(String expression) {
 		originalExpression = expression;
 		setExpression(expression);
 	}
