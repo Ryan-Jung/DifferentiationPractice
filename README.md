@@ -1,5 +1,5 @@
 # Differentiation Practice
-Differentiation Practice is a project designed to help practice and solve problems requiring simple differentiation. It can be used to find d/dx(f(x)) for simple functions. It simply takes in the expression converts the expression into a more easily evaluable form (postfix notation) and then differentiates that expression following simple rules for differentiation. 
+Differentiation Practice is a project designed to help practice and solve problems requiring simple differentiation. It can be used to find d/dx(f(x)) for simple functions. It simply takes in the expression converts the expression into a more easily evaluable form (postfix notation) and then differentiates that expression following simple rules for differentiation. Does not support any other variable other than 'x'.
 
 ---
 # Requires the use of Symja (https://bitbucket.org/axelclk/symja_android_library/wiki/) for simplifying expressions. Download https://bitbucket.org/axelclk/symja_android_library/downloads/symja_java8-2016-07-24.zip and add to the build bath
