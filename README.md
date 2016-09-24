@@ -7,39 +7,29 @@ Download https://www.dropbox.com/s/hakihvl6clvnp6w/differentiation_rj_9_23_2016.
 and add jar to class path. Includes Symja (https://bitbucket.org/axelclk/symja_android_library/wiki/Home) a Java Computer Algebra Library.
 
 # Sample Program:
-### Enter the expression you would like to evaluate or have one randomly generated for you like so:
-```{Java}
-import simpleDifferentiation.rj.*;
 
-//Generate random expression
-Expression expression1 = new Expression();
-//Enter an expression.
-Expression expression2 = new Expression("5x^7 + 2131x * (5x + 381)");
-```
-###### Note: Expressions should only contain the variable 'x'. Expressions with variables in the exponent will not be calculated correctly.
-
-### Then create a Calculator for the given Expression and call differentiate():
 ```{Java}
-Calculator calculator1 = new Calculator(expression1);
-Calculator calculator2 = new Calculator(expression2);
-String answerToExpression1 = "";
-String answerToExpression2 = "";
-//Throws an InvalidExpression exception if there are problems differentiating.
-try{
-    answerToExpression1 = calculator1.differentiate();
-    answerToExpression2 = calculator2.differentiate();
-}catch(InvalidExpression iex){
-    System.out.println(iex.getMessage());
+import simpleDifferentiation.rj.Differentiation;
+import simpleDifferentiation.rj.InvalidExpression;
+
+public class Test{
+	public static void main(String[] args){
+		//provide expression
+		Differentiation df = new Differentiation("5x^5 + 5");
+		String result = "";
+		try{
+			result = df.getSolution();
+		}catch(InvalidExpression){
+			System.out.print("I broke");
+		}
+		
+		System.out.println("This is the result " + result);
+	}
 }
 ```
-###### Note: The answer will not be completely simplified.
-### Then you can simplify your answer
 ```{Java}
-String simplifiedAnswer1 = Simplifier.simplify(answerToExpression1);
-String simplifiedAnswer2 = Simplifier.simplify(answerToExpression2);
+ Output : This is the result 25x^4
 ```
----
-
 
 # It can differentiate expressions that involve:
 #### -The chain rule
