@@ -3,8 +3,7 @@ Differentiation Practice is a project designed to help practice and solve proble
 
 ---
 #How to use
-Download https://www.dropbox.com/s/hakihvl6clvnp6w/differentiation_rj_9_23_2016.jar?dl=0
-and add jar to class path. Includes Symja (https://bitbucket.org/axelclk/symja_android_library/wiki/Home) a Java Computer Algebra Library.
+Clone project.
 
 # Sample Program:
 
@@ -19,7 +18,7 @@ public class Test{
 		String result = "";
 		try{
 			result = df.getSolution();
-		}catch(InvalidExpression){
+		}catch(InvalidExpression ex){
 			System.out.print("I broke");
 		}
 		
